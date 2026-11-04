@@ -1,0 +1,98 @@
+const PRODUCTION_API = 'https://mu.jarvis.ayurvedicpromise.com';
+
+function resolveBaseUrl(): string {
+  const raw = String(import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '');
+  if (import.meta.env.DEV && !raw) return '';
+  return raw || PRODUCTION_API;
+}
+
+const BASE_URL = resolveBaseUrl();
+
+export function apiUrl(path: string): string {
+  return `${BASE_URL}${path}`;
+}
+
+export class ApiError extends Error {
+  status: number;
+  detail: string;
+  constructor(
+    status: number,
+    detail: string,
+    message?: string,
+  ) {
+    super(message ?? detail);
+    this.name = 'ApiError';
+    this.status = status;
+    this.detail = detail;
+  }
+}
+
+async function request<T>(
+  path: string,
+  options: RequestInit = {},
+): Promise<T> {
+  const url = `${BASE_URL}${path}`;
+  const headers = new Headers(options.headers);
+  if (!(options.body instanceof FormData) && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
+  const res = await fetch(url, {
+    ...options,
+    headers,
+  });
+
+  if (res.status === 204) {
+    return undefined as T;
+  }
+
+  let body: unknown;
+  try {
+    body = await res.json();
+  } catch {
+    body = { detail: res.statusText };
+  }
+
+  if (!res.ok) {
+    const detail =
+      (body as { detail?: string })?.detail ?? `HTTP ${res.status}`;
+    throw new ApiError(res.status, detail);
+  }
+
+  return body as T;
+}
+
+export function get<T>(path: string): Promise<T> {
+  return request<T>(path);
+}
+
+export function post<T>(path: string, body: unknown): Promise<T> {
+  return request<T>(path, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export function postForm<T>(path: string, body: FormData): Promise<T> {
+  return request<T>(path, {
+    method: 'POST',
+    body,
+  });
+}
+
+export function patch<T>(path: string, body: unknown): Promise<T> {
+  return request<T>(path, {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  });
+}
+
+export function put<T>(path: string, body: unknown): Promise<T> {
+  return request<T>(path, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
+}
+
+export function del<T>(path: string): Promise<T> {
+  return request<T>(path, { method: 'DELETE' });
+}
