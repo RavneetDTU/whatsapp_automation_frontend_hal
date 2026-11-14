@@ -5,12 +5,12 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: '0.0.0.0',
-    port: 5153,
+    port: 5163,
     strictPort: true,
     proxy: {
-      '/api': 'http://127.0.0.1:5050',
-      '/health': 'http://127.0.0.1:5050',
-      '/webhook': 'http://127.0.0.1:5050',
+      '/api': 'http://127.0.0.1:5060',
+      '/health': 'http://127.0.0.1:5060',
+      '/webhook': 'http://127.0.0.1:5060',
     },
   },
 })

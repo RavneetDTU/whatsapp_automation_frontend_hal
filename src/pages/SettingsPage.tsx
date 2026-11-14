@@ -110,7 +110,7 @@ export function SettingsPage() {
         smtp_host: data.smtp_host,
         smtp_port: data.smtp_port,
         smtp_user: data.smtp_user ?? '',
-        smtp_from_name: data.smtp_from_name ?? 'Jarvis AI Bot',
+        smtp_from_name: data.smtp_from_name ?? 'Jarvis HAL',
       });
     }
   }, [data]);
@@ -204,7 +204,7 @@ export function SettingsPage() {
           <Field label="Supervisor Email" type="email" value={form.supervisor_email ?? ''} onChange={(v) => setField('supervisor_email', v)} />
           <Field label="CC Email Address" type="email" value={form.supervisor_email_cc ?? ''} onChange={(v) => setField('supervisor_email_cc', v)} />
           <Field label="SMTP Host" value={form.smtp_host ?? ''} onChange={(v) => setField('smtp_host', v)} />
-          <Field label="From Name" value={form.smtp_from_name ?? 'Jarvis AI Bot'} onChange={(v) => setField('smtp_from_name', v)} />
+          <Field label="From Name" value={form.smtp_from_name ?? 'Jarvis HAL'} onChange={(v) => setField('smtp_from_name', v)} />
         </SettingsSection>
       </div>
     </div>

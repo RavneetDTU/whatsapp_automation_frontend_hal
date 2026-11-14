@@ -62,7 +62,7 @@ export function Logo({
               Jarvis
             </span>
             <span className={`${titleSizes[size]} font-bold text-indigo-600`}>
-              AI
+              HAL
             </span>
           </div>
           <span

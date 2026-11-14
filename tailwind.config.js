@@ -11,21 +11,9 @@ export default {
       },
       colors: {
         brand: {
-          50: '#FEF2F2',
-          500: '#EF4444',
-          600: '#DC2626',
-        },
-        indigo: {
-          50: '#FEF2F2',
-          100: '#FEE2E2',
-          200: '#FECACA',
-          300: '#FCA5A5',
-          400: '#F87171',
-          500: '#EF4444',
-          600: '#DC2626',
-          700: '#B91C1C',
-          800: '#991B1B',
-          900: '#7F1D1D',
+          50: '#EEF2FF',
+          500: '#6366F1',
+          600: '#4F46E5',
         },
         whatsapp: {
           DEFAULT: '#10B981', // Brand Emerald / WhatsApp green
@@ -38,11 +26,11 @@ export default {
         canvas: '#F8FAFC',
         card: '#FFFFFF',
         sidebar: {
-          bg: '#7F1D1D',
-          hover: '#991B1B',
-          active: '#991B1B',
-          border: '#450A0A',
-          text: '#FECACA',
+          bg: '#1e1b4b',
+          hover: '#312e81',
+          active: '#312e81',
+          border: '#312e81',
+          text: '#c7d2fe',
           'text-active': '#FFFFFF',
         },
       },
@@ -55,8 +43,13 @@ export default {
         'slide-in': 'slideIn 0.2s ease-out',
         'fade-in': 'fadeIn 0.15s ease-out',
         'spin-slow': 'spin 1.5s linear infinite',
+        'meta-load': 'metaLoad 1.2s ease-in-out infinite',
       },
       keyframes: {
+        metaLoad: {
+          '0%': { transform: 'translateX(-120%)' },
+          '100%': { transform: 'translateX(380%)' },
+        },
         slideIn: {
           '0%': { transform: 'translateX(-10px)', opacity: '0' },
           '100%': { transform: 'translateX(0)', opacity: '1' },

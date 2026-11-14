@@ -1,4 +1,4 @@
-const PRODUCTION_API = 'https://mu.jarvis.ayurvedicpromise.com';
+const PRODUCTION_API = 'https://hal.jarvis.ayurvedicpromise.com';
 
 function resolveBaseUrl(): string {
   const raw = String(import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '');

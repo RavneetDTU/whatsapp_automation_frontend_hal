@@ -203,7 +203,7 @@ function AddStandLeadModal({
         send_mode: form.send_mode,
         send_at: sendAt,
       });
-      toast('success', form.send_mode === 'scheduled' ? 'Lead scheduled.' : 'Lead sent to Jarvis.');
+      toast('success', form.send_mode === 'scheduled' ? 'Lead scheduled.' : 'Lead sent to Jarvis HAL.');
       onSuccess();
       onClose();
     } catch (err) {
@@ -430,7 +430,7 @@ export function PromotionalStandPage() {
   const sendNow = useMutation({
     mutationFn: (leadId: number) => post<{ status: string }>(`/api/stand/leads/${leadId}/send-now`, {}),
     onMutate: (leadId) => setSendingId(leadId),
-    onSuccess: () => toast('success', 'Lead sent to Jarvis.'),
+    onSuccess: () => toast('success', 'Lead sent to Jarvis HAL.'),
     onError: (err) => toast('error', (err as Error).message ?? 'Could not send lead.'),
     onSettled: () => {
       setSendingId(null);
@@ -514,7 +514,7 @@ export function PromotionalStandPage() {
                   <SortArrows active={sort === 'timer_asc' || sort === 'timer_desc'} direction={sort === 'timer_asc' ? 'asc' : 'desc'} />
                 </button>
               </th>
-              {['Jarvis', 'Send'].map((label) => (
+              {['Jarvis HAL', 'Send'].map((label) => (
                 <th key={label} className={HEAD}>{label}</th>
               ))}
             </tr>

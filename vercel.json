@@ -13,7 +13,7 @@
         { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; connect-src 'self' https://mu.jarvis.ayurvedicpromise.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://mu.jarvis.ayurvedicpromise.com; frame-ancestors 'none';"
+          "value": "default-src 'self'; connect-src 'self' https://hal.jarvis.ayurvedicpromise.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://hal.jarvis.ayurvedicpromise.com; frame-ancestors 'none';"
         }
       ]
     }

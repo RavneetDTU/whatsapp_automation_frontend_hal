@@ -8,8 +8,8 @@ This document details the operational configuration, environment variables, auth
 
 | Environment | Component | URL | Notes |
 |---|---|---|---|
-| This deployment | Frontend | `http://127.0.0.1:5050` (or Vite `:5153`) | Same machine until a Vercel project exists |
-| This deployment | Backend | `http://127.0.0.1:5050` | FastAPI / Uvicorn, database `whatsapp_mu` |
+| This deployment | Frontend | `http://127.0.0.1:5060` (or Vite `:5163`) | Same machine until a Vercel project exists |
+| This deployment | Backend | `http://127.0.0.1:5060` | FastAPI / Uvicorn, database `whatsapp_hal` |
 
 ---
 

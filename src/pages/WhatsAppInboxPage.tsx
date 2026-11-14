@@ -183,9 +183,9 @@ export function WhatsAppInboxPage() {
             <div className="w-20 h-20 rounded-full bg-emerald-50 flex items-center justify-center mb-4 text-emerald-600 shadow-md border border-emerald-100">
               <MessageSquare size={36} />
             </div>
-            <h2 className="text-lg font-bold text-slate-900 mb-1">Jarvis AI Wati Inbox</h2>
+            <h2 className="text-lg font-bold text-slate-900 mb-1">Jarvis HAL Wati Inbox</h2>
             <p className="text-xs text-slate-500 max-w-sm leading-relaxed">
-              Select a conversation to inspect Wati chat history, send a manual reply, or toggle Jarvis AI mode.
+              Select a conversation to inspect Wati chat history, send a manual reply, or toggle Jarvis HAL mode.
             </p>
           </div>
         ) : (

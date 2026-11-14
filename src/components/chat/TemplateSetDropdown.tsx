@@ -122,7 +122,7 @@ export function TemplateSetDropdown({
                 <p className="text-sm font-semibold text-slate-900 mt-0.5">{pending.name}</p>
               </div>
               <p className="text-[11px] text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-2.5 py-2 leading-relaxed">
-                This sends immediately, even if Jarvis AI is on.
+                This sends immediately, even if Jarvis HAL is on.
               </p>
               <pre className="text-xs text-slate-700 whitespace-pre-wrap break-words leading-relaxed bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-2 font-sans">
                 {filledBody || 'No message body is available for this template.'}

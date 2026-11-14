@@ -4,6 +4,7 @@ import { ChevronDown, ChevronUp, X } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { get, post } from '../../lib/api';
 import type { Campaign, MetaCampaignFields, MetaCampaignOption, MetaFieldMap } from '../../types';
+import { Spinner } from '../ui/Spinner';
 import { Toggle } from '../ui/Toggle';
 
 const EMPTY_MAP: MetaFieldMap = { name: [], phone: [], email: [], city: [], location: [] };
@@ -208,21 +209,46 @@ export function CreateMetaCampaignModal({
             <label htmlFor="meta-campaign-select" className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
               Meta Campaign <span className="text-red-500">*</span>
             </label>
-            <select
-              id="meta-campaign-select"
-              className="input w-full"
-              value={selectedId}
-              onChange={(event) => setSelectedId(event.target.value)}
-              required
-            >
-              <option value="">Select a Meta campaign</option>
-              {(campaignsQuery.data ?? []).map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.name} ({item.status || 'UNKNOWN'})
+            {campaignsQuery.isLoading ? (
+              <div
+                className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"
+                role="status"
+                aria-live="polite"
+              >
+                <div className="flex items-center gap-3">
+                  <Spinner size="sm" />
+                  <div>
+                    <p className="text-sm font-medium text-slate-800">Pulling campaigns from Meta</p>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      This reads the ad account directly. The first load can take a little while.
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
+                  <div className="h-full w-1/3 rounded-full bg-red-500 animate-meta-load" />
+                </div>
+              </div>
+            ) : (
+              <select
+                id="meta-campaign-select"
+                className="input w-full"
+                value={selectedId}
+                onChange={(event) => setSelectedId(event.target.value)}
+                required
+                disabled={campaignsQuery.isError}
+              >
+                <option value="">
+                  {(campaignsQuery.data ?? []).length === 0 && campaignsQuery.isSuccess
+                    ? 'No active Meta campaigns'
+                    : 'Select a Meta campaign'}
                 </option>
-              ))}
-            </select>
-            {campaignsQuery.isLoading && <p className="text-xs text-slate-500">Loading Meta campaigns…</p>}
+                {(campaignsQuery.data ?? []).map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+            )}
             {campaignsQuery.isError && (
               <p className="text-xs text-red-600">{(campaignsQuery.error as Error).message}</p>
             )}
@@ -230,7 +256,7 @@ export function CreateMetaCampaignModal({
 
           <div className="space-y-1.5">
             <label htmlFor="meta-campaign-name" className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
-              Jarvis Campaign Name <span className="text-red-500">*</span>
+              Jarvis HAL Campaign Name <span className="text-red-500">*</span>
             </label>
             <input
               id="meta-campaign-name"

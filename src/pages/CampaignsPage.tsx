@@ -215,7 +215,7 @@ export function CampaignsPage() {
             <span className="text-indigo-600">Campaigns Overview</span>
           </div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">AI Lead Campaigns</h1>
-          <p className="text-xs text-slate-500 mt-0.5">Meta ad accounts linked to automated Jarvis AI WhatsApp sequences.</p>
+          <p className="text-xs text-slate-500 mt-0.5">Meta ad accounts linked to automated Jarvis HAL WhatsApp sequences.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button

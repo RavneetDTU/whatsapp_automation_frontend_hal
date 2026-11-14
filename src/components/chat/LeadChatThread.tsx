@@ -207,7 +207,7 @@ export function LeadChatThread({ leadId, showIdentity = true }: LeadChatThreadPr
           />
           <div className="flex items-center gap-2 pl-3 border-l border-slate-200">
             <Bot size={18} className={aiMode ? 'text-indigo-600' : 'text-slate-400'} />
-            <span className="text-xs font-semibold text-slate-700">Jarvis AI Mode</span>
+            <span className="text-xs font-semibold text-slate-700">Jarvis HAL Mode</span>
             <Toggle
               enabled={aiMode}
               onChange={(val) => {
@@ -249,7 +249,7 @@ export function LeadChatThread({ leadId, showIdentity = true }: LeadChatThreadPr
                   <div className="flex items-center gap-1.5 mb-1 px-1">
                     {isAi ? (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-800 font-bold text-[10px]">
-                        <Bot size={11} /> Jarvis AI
+                        <Bot size={11} /> Jarvis HAL
                       </span>
                     ) : isTemplate && isOut ? (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-semibold text-[10px]">
@@ -311,7 +311,7 @@ export function LeadChatThread({ leadId, showIdentity = true }: LeadChatThreadPr
         ) : aiMode ? (
           <div className="mb-2 px-3 py-1.5 rounded-lg bg-indigo-50 border border-indigo-200 text-xs text-indigo-800 flex items-center gap-1.5">
             <Bot size={14} className="text-indigo-600 shrink-0" />
-            <span>Jarvis AI mode is active. Turn off AI mode in the header to send manual agent messages.</span>
+            <span>Jarvis HAL mode is active. Turn off AI mode in the header to send manual agent messages.</span>
           </div>
         ) : null}
         <div className="flex items-center gap-3">
@@ -338,7 +338,7 @@ export function LeadChatThread({ leadId, showIdentity = true }: LeadChatThreadPr
       <Modal
         open={aiConflictModal}
         onClose={() => setAiConflictModal(false)}
-        title="Jarvis AI Active"
+        title="Jarvis HAL Active"
         subtitle="Manual override required"
         maxWidth="sm"
         lockScroll={false}
@@ -350,10 +350,10 @@ export function LeadChatThread({ leadId, showIdentity = true }: LeadChatThreadPr
           <Bot size={24} className="text-indigo-600 shrink-0 mt-0.5" />
           <div className="text-sm text-slate-700 leading-relaxed">
             <p>
-              Jarvis AI is actively automating replies for this lead.
+              Jarvis HAL is actively automating replies for this lead.
             </p>
             <p className="mt-1.5 text-xs text-slate-500">
-              Please turn off <strong>Jarvis AI Mode</strong> in the top chat header to take over manually.
+              Please turn off <strong>Jarvis HAL Mode</strong> in the top chat header to take over manually.
             </p>
           </div>
         </div>
