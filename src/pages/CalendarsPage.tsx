@@ -133,7 +133,7 @@ export function CalendarsPage() {
                       </p>
                     </div>
                   </div>
-                  <ConnectionBadge connected={cal.is_connected} />
+                  <ConnectionBadge connected={cal.is_connected} status={cal.connection_status} />
                 </div>
 
                 {cal.google_calendar_id && (
@@ -153,7 +153,7 @@ export function CalendarsPage() {
                   <Settings size={14} />
                   Configure Branch
                 </button>
-                {!cal.is_connected && (
+                {(cal.connection_status === 'broken' || cal.connection_status === 'disconnected' || !cal.is_connected) && (
                   <button
                     onClick={() => handleReconnect(cal)}
                     className="btn-secondary px-3 py-2 text-xs"
@@ -161,6 +161,7 @@ export function CalendarsPage() {
                     title="Authorize via Google OAuth"
                   >
                     <ExternalLink size={14} />
+                    Reconnect
                   </button>
                 )}
                 <button

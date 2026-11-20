@@ -347,12 +347,15 @@ export interface PlatformSettingsUpdate {
 
 // --- Calendars ---
 
+export type CalendarConnectionStatus = 'connected' | 'broken' | 'disconnected';
+
 export interface CalendarResponse {
   id: number;
   display_name: string;
   location: string;
   google_calendar_id: string | null;
   token_expiry: string | null;
+  connection_status?: CalendarConnectionStatus;
   is_connected: boolean;
 }
 

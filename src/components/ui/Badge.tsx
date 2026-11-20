@@ -85,13 +85,30 @@ export function ActiveBadge({ active, onLabel = 'Auto ON', offLabel = 'Auto OFF'
 
 interface ConnectionBadgeProps {
   connected: boolean;
+  status?: 'connected' | 'broken' | 'disconnected';
 }
 
-export function ConnectionBadge({ connected }: ConnectionBadgeProps) {
+export function ConnectionBadge({ connected, status }: ConnectionBadgeProps) {
+  const resolved = status ?? (connected ? 'connected' : 'disconnected');
+  const styles = {
+    connected: 'bg-emerald-50 text-emerald-800 border border-emerald-200/80 font-bold',
+    broken: 'bg-amber-50 text-amber-900 border border-amber-300 font-bold',
+    disconnected: 'bg-rose-50 text-rose-800 border border-rose-200/80 font-bold',
+  } as const;
+  const dots = {
+    connected: 'bg-emerald-500',
+    broken: 'bg-amber-500',
+    disconnected: 'bg-rose-500',
+  } as const;
+  const labels = {
+    connected: '🟢 Connected',
+    broken: 'Broken',
+    disconnected: '🔴 Not Connected',
+  } as const;
   return (
-    <span className={`status-badge ${connected ? 'bg-emerald-50 text-emerald-800 border border-emerald-200/80 font-bold' : 'bg-rose-50 text-rose-800 border border-rose-200/80 font-bold'}`}>
-      <span className={`mr-1.5 w-1.5 h-1.5 rounded-full inline-block ${connected ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-      {connected ? '🟢 Connected' : '🔴 Not Connected'}
+    <span className={`status-badge ${styles[resolved]}`}>
+      <span className={`mr-1.5 w-1.5 h-1.5 rounded-full inline-block ${dots[resolved]}`} />
+      {labels[resolved]}
     </span>
   );
 }
