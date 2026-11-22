@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CircleHelp, Download, Upload } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
-import { postForm } from '../../lib/api';
+import { ApiError, postForm } from '../../lib/api';
 import { downloadLeadImportTemplate } from '../../lib/csv';
-import type { CsvImportResponse } from '../../types';
+import type { CsvImportError, CsvImportResponse } from '../../types';
 import { Modal } from '../ui/Modal';
 import { Spinner } from '../ui/Spinner';
 
@@ -59,10 +59,10 @@ function CsvFormatHelp() {
   return (
     <div className="space-y-2">
       <p className="font-semibold text-slate-800">CSV format</p>
-      <p>Phone and name are enough to send the opener. Use these columns:</p>
+      <p>Every row must have a name, phone, and store. If anything is missing, the file is rejected and no messages are sent.</p>
       <ul className="list-disc pl-4 space-y-1 text-xs leading-relaxed">
-        <li>First name, Last name, Phone number (required)</li>
-        <li>Preferred warehouse (the store Jarvis books): Tokai, Brackenfell, Longbeach, Somerset, Vredenburg, or Langebaan</li>
+        <li>First name, Last name, Phone number, Preferred warehouse (required)</li>
+        <li>Warehouse must be Tokai, Brackenfell, Longbeach, Somerset, Vredenburg, or Langebaan</li>
         <li>Email ID and City can be blank. City is suburb only — do not put the store there instead of warehouse.</li>
       </ul>
       <p className="text-xs">Phones can be +27 82…, 082…, or 2782…. Auto Message plus a selected template is what actually sends.</p>
@@ -82,6 +82,8 @@ export function CsvImportModal({
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<CsvImportResponse | null>(null);
+  const [rowErrors, setRowErrors] = useState<CsvImportError[] | null>(null);
+  const [rejectMessage, setRejectMessage] = useState<string | null>(null);
 
   const mutation = useMutation({
     mutationFn: (upload: File) => {
@@ -90,17 +92,28 @@ export function CsvImportModal({
       return postForm<CsvImportResponse>(`/api/campaigns/${campaignId}/leads/import`, body);
     },
     onSuccess: (res) => {
+      setRowErrors(null);
+      setRejectMessage(null);
       setResult(res);
       qc.invalidateQueries({ queryKey: ['campaign-leads', campaignId] });
       qc.invalidateQueries({ queryKey: ['campaigns'] });
       qc.invalidateQueries({ queryKey: ['leads'] });
-      if (res.errors.length === 0) {
-        toast('success', `Imported ${res.created + res.reused} lead${res.created + res.reused === 1 ? '' : 's'}.`);
-      } else {
-        toast('error', `Imported with ${res.errors.length} row error${res.errors.length === 1 ? '' : 's'}.`);
-      }
+      toast('success', `Imported ${res.created + res.reused} lead${res.created + res.reused === 1 ? '' : 's'}.`);
     },
     onError: (err: Error) => {
+      setResult(null);
+      if (err instanceof ApiError && err.errors?.length) {
+        setRejectMessage(err.message);
+        setRowErrors(err.errors.map((item) => ({
+          row: item.row ?? 0,
+          phone: item.phone ?? '',
+          error: item.error,
+        })));
+        toast('error', 'CSV was not imported. Fix the rows below and upload again.');
+        return;
+      }
+      setRowErrors(null);
+      setRejectMessage(err.message ?? 'Failed to import CSV.');
       toast('error', err.message ?? 'Failed to import CSV.');
     },
   });
@@ -108,6 +121,8 @@ export function CsvImportModal({
   function handleClose() {
     setFile(null);
     setResult(null);
+    setRowErrors(null);
+    setRejectMessage(null);
     mutation.reset();
     if (inputRef.current) inputRef.current.value = '';
     onClose();
@@ -152,17 +167,35 @@ export function CsvImportModal({
               type="file"
               accept=".csv,text/csv"
               className="block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100"
-              onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+              onChange={(event) => {
+                setFile(event.target.files?.[0] ?? null);
+                setRowErrors(null);
+                setRejectMessage(null);
+              }}
             />
             {file ? <p className="text-xs text-slate-500 mt-1">{file.name}</p> : null}
           </div>
+          {rejectMessage ? (
+            <div className="rounded-xl border border-amber-200 bg-amber-50 overflow-hidden">
+              <p className="px-3 py-2 text-xs font-semibold text-amber-900">{rejectMessage}</p>
+              {rowErrors && rowErrors.length > 0 ? (
+                <ul className="max-h-48 overflow-y-auto divide-y divide-amber-100 bg-white">
+                  {rowErrors.map((item) => (
+                    <li key={`${item.row}-${item.phone}-${item.error}`} className="px-3 py-2 text-xs text-slate-700">
+                      Row {item.row}{item.phone ? ` (${item.phone})` : ''}: {item.error}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+          ) : null}
           {!autoMessage || !assignedTemplateName ? (
             <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
               Leads will be saved. Turn on Auto Message and select a template to send the opener.
             </p>
           ) : null}
           <p className="text-xs text-slate-500">
-            Required columns: First name, Last name, Phone number. Warehouse must be Blouberg Branch or Durbanville Branch.
+            Required on every row: First name, Last name, Phone number, Preferred warehouse (Tokai, Brackenfell, Longbeach, Somerset, Vredenburg, or Langebaan).
           </p>
           <button type="button" onClick={downloadLeadImportTemplate} className="btn-secondary">
             <Download size={14} />

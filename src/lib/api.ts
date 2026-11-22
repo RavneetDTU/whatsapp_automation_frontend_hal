@@ -15,16 +15,30 @@ export function apiUrl(path: string): string {
 export class ApiError extends Error {
   status: number;
   detail: string;
+  errors?: Array<{ row?: number; phone?: string; error: string }>;
   constructor(
     status: number,
     detail: string,
     message?: string,
+    errors?: Array<{ row?: number; phone?: string; error: string }>,
   ) {
     super(message ?? detail);
     this.name = 'ApiError';
     this.status = status;
     this.detail = detail;
+    this.errors = errors;
   }
+}
+
+function apiErrorFromBody(status: number, body: unknown): ApiError {
+  const raw = (body as { detail?: unknown } | null)?.detail;
+  if (typeof raw === 'string') return new ApiError(status, raw);
+  if (raw && typeof raw === 'object') {
+    const payload = raw as { message?: string; errors?: Array<{ row?: number; phone?: string; error: string }> };
+    const message = payload.message || `HTTP ${status}`;
+    return new ApiError(status, message, message, Array.isArray(payload.errors) ? payload.errors : undefined);
+  }
+  return new ApiError(status, `HTTP ${status}`);
 }
 
 async function request<T>(
@@ -53,9 +67,7 @@ async function request<T>(
   }
 
   if (!res.ok) {
-    const detail =
-      (body as { detail?: string })?.detail ?? `HTTP ${res.status}`;
-    throw new ApiError(res.status, detail);
+    throw apiErrorFromBody(res.status, body);
   }
 
   return body as T;
