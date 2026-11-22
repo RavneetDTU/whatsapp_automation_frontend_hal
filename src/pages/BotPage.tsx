@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Navigate, useParams } from 'react-router-dom';
-import { ChevronDown, ChevronUp, Plus, RotateCcw, Save, Send, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Plus, RotateCcw, Save, Send, Ticket, Trash2 } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import { del, get, patch, post } from '../lib/api';
 import type { Bot, BotAutofillItem, BotChatMessage, BotChatResponse } from '../types';
@@ -9,6 +9,7 @@ import { ErrorState } from '../components/ui/States';
 import { Spinner } from '../components/ui/Spinner';
 
 const BOT_SLOTS = [1, 2, 3, 4, 5] as const;
+const BOT_SUPPORT_EMAIL = 'support@ayurvedicpromise.com';
 
 interface SampleLead {
   lead_name: string;
@@ -179,6 +180,19 @@ function BotEditor({ slot }: { slot: number }) {
         <p className="text-xs text-slate-500 mt-1">
           Tell this bot who it is, how it should talk, and what to do. Save, then try it in Demo before assigning it to a campaign.
         </p>
+      </div>
+
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3.5">
+        <p className="flex-1 text-lg font-bold text-red-700 leading-snug">
+          Tuning a perfect AI bot might require some expertise. Press this button to raise a support ticket to have an expert make changes in your bot.
+        </p>
+        <a
+          className="inline-flex items-center justify-center gap-2 shrink-0 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700"
+          href={`mailto:${BOT_SUPPORT_EMAIL}?subject=${encodeURIComponent(`Hearing Aid Labs — expert tuning for Bot ${slot}`)}&body=${encodeURIComponent(`Please have an expert make changes to Bot ${slot} on Jarvis HAL.`)}`}
+        >
+          <Ticket size={16} />
+          Raise a support ticket
+        </a>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
