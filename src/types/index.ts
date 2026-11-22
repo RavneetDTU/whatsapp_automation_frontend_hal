@@ -68,10 +68,13 @@ export interface Campaign {
   assigned_template_name: string | null;
   assigned_template_set_at: string | null;
   template_set: string[];
+  reminder_template_name: string | null;
+  missed_appointment_template_name: string | null;
   followup_template_name: string | null;
   final_template_name: string | null;
   followup_delay_hours: number;
   final_delay_hours: number;
+  bot_id?: number;
   synced_at?: string | null;
   lead_count: number;
   messages_sent_count?: number;
@@ -86,10 +89,13 @@ export interface CampaignUpdate {
   name?: string | null;
   assigned_template_name?: string | null;
   template_set?: string[] | null;
+  reminder_template_name?: string | null;
+  missed_appointment_template_name?: string | null;
   followup_template_name?: string | null;
   final_template_name?: string | null;
   followup_delay_hours?: number | null;
   final_delay_hours?: number | null;
+  bot_id?: number | null;
 }
 
 export interface WatiTemplateButton {
@@ -421,4 +427,60 @@ export interface CalendarConfigResponse {
 export interface CampaignLeadsPaginatedResponse {
   total: number;
   items: LeadListItem[];
+}
+
+export interface DailyAppointment {
+  session_id: number;
+  lead_id: string | null;
+  full_name: string;
+  phone: string | null;
+  store_name: string | null;
+  campaign_id: string | null;
+  campaign_name: string | null;
+  appointment_datetime: string | null;
+  appointment_time: string | null;
+  reminder_sent: boolean;
+  reminder_sent_at: string | null;
+  missed_template_sent: boolean;
+  missed_template_sent_at: string | null;
+  can_send_missed: boolean;
+  missed_disabled_reason: string | null;
+}
+
+export interface DailyAppointmentList {
+  date: string;
+  today: string;
+  timezone: string;
+  store: string | null;
+  stores: string[];
+  count: number;
+  items: DailyAppointment[];
+}
+
+export interface BotAutofillItem {
+  label: string;
+  value: string;
+}
+
+export interface Bot {
+  slot: number;
+  name: string;
+  persona: string;
+  instructions: string;
+  steps: string[];
+  base_prompt: string;
+  updated_at: string | null;
+  autofill?: BotAutofillItem[];
+}
+
+export interface BotChatMessage {
+  role: 'user' | 'assistant' | string;
+  content: string;
+}
+
+export interface BotChatResponse {
+  reply?: string;
+  booking_made?: boolean;
+  appointment_cancelled?: boolean;
+  messages: BotChatMessage[];
 }

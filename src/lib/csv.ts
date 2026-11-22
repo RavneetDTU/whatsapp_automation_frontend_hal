@@ -35,7 +35,7 @@ function downloadCsv(filename: string, headers: readonly string[], rows: string[
 
 export function downloadLeadImportTemplate(): void {
   downloadCsv('campaign-leads-template.csv', LEAD_IMPORT_HEADERS, [
-    ['Jane', 'Doe', 'Blouberg Branch', '+27 82 123 4567', 'jane@example.com', 'Cape Town'],
+    ['Jane', 'Doe', 'Brackenfell', '+27 82 123 4567', 'jane@example.com', 'Cape Town'],
   ]);
 }
 

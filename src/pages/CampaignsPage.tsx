@@ -4,13 +4,14 @@ import { LayoutGrid, Globe2, FileText, Users, Plus, TrendingUp, Sparkles, X } fr
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useToast } from '../context/ToastContext';
-import { get, post } from '../lib/api';
+import { get, patch, post } from '../lib/api';
 import type { Campaign, CampaignSummary } from '../types';
 import { ActiveBadge } from '../components/ui/Badge';
 import { Toggle } from '../components/ui/Toggle';
 import { CardSkeleton } from '../components/ui/Spinner';
 import { ErrorState, EmptyState } from '../components/ui/States';
 import { TemplatePicker } from '../components/campaigns/TemplatePicker';
+import { AppointmentTemplatePicker } from '../components/campaigns/AppointmentTemplatePicker';
 import { TemplateSetPicker } from '../components/campaigns/TemplateSetPicker';
 import { FollowupSequencePicker } from '../components/campaigns/FollowupSequencePicker';
 import { CreateMetaCampaignModal } from '../components/campaigns/CreateMetaCampaignModal';
@@ -185,6 +186,8 @@ export function CampaignsPage() {
   const qc = useQueryClient();
   const [pickerCampaignId, setPickerCampaignId] = useState<string | null>(null);
   const [templateSetCampaignId, setTemplateSetCampaignId] = useState<string | null>(null);
+  const [reminderCampaignId, setReminderCampaignId] = useState<string | null>(null);
+  const [missedCampaignId, setMissedCampaignId] = useState<string | null>(null);
   const [followupCampaignId, setFollowupCampaignId] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [createMetaOpen, setCreateMetaOpen] = useState(false);
@@ -309,6 +312,8 @@ export function CampaignsPage() {
                 onNavigate={() => navigate(`/campaigns/${campaign.id}/leads`)}
                 onTemplateClick={() => setPickerCampaignId(campaign.id)}
                 onTemplateSetClick={() => setTemplateSetCampaignId(campaign.id)}
+                onReminderClick={() => setReminderCampaignId(campaign.id)}
+                onMissedClick={() => setMissedCampaignId(campaign.id)}
                 onFollowupClick={() => setFollowupCampaignId(campaign.id)}
               />
             ))}
@@ -331,6 +336,30 @@ export function CampaignsPage() {
           currentSet={campaigns.find((c) => c.id === templateSetCampaignId)?.template_set ?? []}
           open={!!templateSetCampaignId}
           onClose={() => setTemplateSetCampaignId(null)}
+        />
+      )}
+
+      {reminderCampaignId && (
+        <AppointmentTemplatePicker
+          campaignId={reminderCampaignId}
+          field="reminder_template_name"
+          currentName={campaigns.find((c) => c.id === reminderCampaignId)?.reminder_template_name ?? null}
+          title="Reminder template"
+          subtitle="Sent by the appointment bot at 10:00 South Africa time the day before the visit."
+          open={!!reminderCampaignId}
+          onClose={() => setReminderCampaignId(null)}
+        />
+      )}
+
+      {missedCampaignId && (
+        <AppointmentTemplatePicker
+          campaignId={missedCampaignId}
+          field="missed_appointment_template_name"
+          currentName={campaigns.find((c) => c.id === missedCampaignId)?.missed_appointment_template_name ?? null}
+          title="Missed appointment template"
+          subtitle="Sent only when a person presses the button after the appointment time has passed."
+          open={!!missedCampaignId}
+          onClose={() => setMissedCampaignId(null)}
         />
       )}
 
@@ -370,15 +399,20 @@ export function CampaignsPage() {
 // ─── Campaign Card (toggle removed) ──────────────────────────────────────────
 
 function CampaignCard({
-  campaign, onNavigate, onTemplateClick, onTemplateSetClick, onFollowupClick,
+  campaign, onNavigate, onTemplateClick, onTemplateSetClick, onReminderClick, onMissedClick, onFollowupClick,
 }: {
   campaign: Campaign;
   onNavigate: () => void;
   onTemplateClick: () => void;
   onTemplateSetClick: () => void;
+  onReminderClick: () => void;
+  onMissedClick: () => void;
   onFollowupClick: () => void;
 }) {
+  const { toast } = useToast();
+  const qc = useQueryClient();
   const templateSet = campaign.template_set ?? [];
+  const botId = campaign.bot_id ?? 1;
   return (
     <div
       className="card p-6 flex flex-col gap-5 cursor-pointer hover:border-indigo-300 hover:shadow-elevated transition-all duration-150 group bg-white"
@@ -403,6 +437,73 @@ function CampaignCard({
         </div>
         <ActiveBadge active={campaign.is_active} />
       </div>
+
+      <label
+        className="block"
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
+      >
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Assigned bot</span>
+        <select
+          className="select mt-1.5 text-xs font-semibold"
+          value={botId}
+          aria-label="Assign bot"
+          onChange={async (e) => {
+            const next = Number(e.target.value);
+            try {
+              await patch<Campaign>(`/api/campaigns/${campaign.id}`, { bot_id: next });
+              qc.invalidateQueries({ queryKey: ['campaigns'] });
+              toast('success', `Assigned Bot ${next}.`);
+            } catch (err) {
+              toast('error', (err as Error).message ?? 'Failed to assign bot.');
+            }
+          }}
+        >
+          {[1, 2, 3, 4, 5].map((slot) => (
+            <option key={slot} value={slot}>
+              Bot {slot}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <button
+        onClick={(e) => { e.stopPropagation(); onReminderClick(); }}
+        className={`w-full text-left px-3.5 py-2.5 rounded-xl border text-xs font-semibold transition-all duration-150 ${
+          campaign.reminder_template_name
+            ? 'border-indigo-200/80 bg-indigo-50/50 text-indigo-800 hover:bg-indigo-100/60'
+            : 'border-dashed border-slate-300 text-slate-500 hover:border-indigo-400 hover:text-indigo-600 bg-slate-50/60'
+        }`}
+        aria-label="Assign reminder template"
+      >
+        <div className="flex items-center justify-between gap-2">
+          <span className="truncate">
+            {campaign.reminder_template_name
+              ? `Reminder: ${campaign.reminder_template_name}`
+              : '+ Reminder template'}
+          </span>
+          <span className="text-[10px] text-slate-400 font-mono shrink-0">Change</span>
+        </div>
+      </button>
+
+      <button
+        onClick={(e) => { e.stopPropagation(); onMissedClick(); }}
+        className={`w-full text-left px-3.5 py-2.5 rounded-xl border text-xs font-semibold transition-all duration-150 ${
+          campaign.missed_appointment_template_name
+            ? 'border-rose-200/80 bg-rose-50/60 text-rose-800 hover:bg-rose-100/60'
+            : 'border-dashed border-slate-300 text-slate-500 hover:border-indigo-400 hover:text-indigo-600 bg-slate-50/60'
+        }`}
+        aria-label="Assign missed appointment template"
+      >
+        <div className="flex items-center justify-between gap-2">
+          <span className="truncate">
+            {campaign.missed_appointment_template_name
+              ? `Missed: ${campaign.missed_appointment_template_name}`
+              : '+ Missed appointment template'}
+          </span>
+          <span className="text-[10px] text-slate-400 font-mono shrink-0">Change</span>
+        </div>
+      </button>
 
       {/* Template Assignment Picker */}
       <button

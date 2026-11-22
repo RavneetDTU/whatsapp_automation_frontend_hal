@@ -13,6 +13,7 @@ import { ErrorState, EmptyState } from '../components/ui/States';
 import { Pagination } from '../components/ui/Pagination';
 import { LeadModal } from '../components/leads/LeadModal';
 import { TemplatePicker } from '../components/campaigns/TemplatePicker';
+import { AppointmentTemplatePicker } from '../components/campaigns/AppointmentTemplatePicker';
 import { TemplateSetPicker } from '../components/campaigns/TemplateSetPicker';
 import { FollowupSequencePicker } from '../components/campaigns/FollowupSequencePicker';
 import { CsvImportHelpButton, CsvImportModal } from '../components/campaigns/CsvImportModal';
@@ -28,6 +29,8 @@ export function CampaignLeadsPage() {
   const [selectedLead, setSelectedLead] = useState<string | null>(null);
   const [templateOpen, setTemplateOpen] = useState(false);
   const [templateSetOpen, setTemplateSetOpen] = useState(false);
+  const [reminderOpen, setReminderOpen] = useState(false);
+  const [missedOpen, setMissedOpen] = useState(false);
   const [followupOpen, setFollowupOpen] = useState(false);
   const [csvOpen, setCsvOpen] = useState(false);
 
@@ -120,6 +123,22 @@ export function CampaignLeadsPage() {
             Template set ({(campaign?.template_set ?? []).length}/5)
           </button>
           <button
+            onClick={() => setReminderOpen(true)}
+            className="btn-secondary"
+          >
+            <FileText size={15} />
+            {campaign?.reminder_template_name ? `Reminder: ${campaign.reminder_template_name}` : 'Reminder template'}
+          </button>
+          <button
+            onClick={() => setMissedOpen(true)}
+            className="btn-secondary"
+          >
+            <FileText size={15} />
+            {campaign?.missed_appointment_template_name
+              ? `Missed: ${campaign.missed_appointment_template_name}`
+              : 'Missed appointment'}
+          </button>
+          <button
             onClick={() => setFollowupOpen(true)}
             className="btn-secondary"
           >
@@ -206,6 +225,28 @@ export function CampaignLeadsPage() {
           currentSet={campaign?.template_set ?? []}
           open={templateSetOpen}
           onClose={() => setTemplateSetOpen(false)}
+        />
+      )}
+      {campaignId && (
+        <AppointmentTemplatePicker
+          campaignId={campaignId}
+          field="reminder_template_name"
+          currentName={campaign?.reminder_template_name ?? null}
+          title="Reminder template"
+          subtitle="Sent by the appointment bot at 10:00 South Africa time the day before the visit."
+          open={reminderOpen}
+          onClose={() => setReminderOpen(false)}
+        />
+      )}
+      {campaignId && (
+        <AppointmentTemplatePicker
+          campaignId={campaignId}
+          field="missed_appointment_template_name"
+          currentName={campaign?.missed_appointment_template_name ?? null}
+          title="Missed appointment template"
+          subtitle="Sent only when a person presses the button after the appointment time has passed."
+          open={missedOpen}
+          onClose={() => setMissedOpen(false)}
         />
       )}
       {campaignId && (

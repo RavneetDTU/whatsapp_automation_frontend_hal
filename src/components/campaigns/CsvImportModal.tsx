@@ -62,8 +62,8 @@ function CsvFormatHelp() {
       <p>Phone and name are enough to send the opener. Use these columns:</p>
       <ul className="list-disc pl-4 space-y-1 text-xs leading-relaxed">
         <li>First name, Last name, Phone number (required)</li>
-        <li>Preferred warehouse: Blouberg Branch or Durbanville Branch</li>
-        <li>Email ID and City can be blank</li>
+        <li>Preferred warehouse (the store Jarvis books): Tokai, Brackenfell, Longbeach, Somerset, Vredenburg, or Langebaan</li>
+        <li>Email ID and City can be blank. City is suburb only — do not put the store there instead of warehouse.</li>
       </ul>
       <p className="text-xs">Phones can be +27 82…, 082…, or 2782…. Auto Message plus a selected template is what actually sends.</p>
     </div>
