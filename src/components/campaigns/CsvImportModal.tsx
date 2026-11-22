@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CircleHelp, Download, Upload } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
-import { ApiError, postForm } from '../../lib/api';
+import { ApiError, get, postForm } from '../../lib/api';
+import { formatStoreList, storeNamesFromCalendars } from '../../lib/branches';
 import { downloadLeadImportTemplate } from '../../lib/csv';
-import type { CsvImportError, CsvImportResponse } from '../../types';
+import type { CalendarResponse, CsvImportError, CsvImportResponse } from '../../types';
 import { Modal } from '../ui/Modal';
 import { Spinner } from '../ui/Spinner';
 
@@ -19,6 +20,7 @@ interface CsvImportModalProps {
 export function CsvImportHelpButton() {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const { stores } = useStoreNames();
 
   useEffect(() => {
     if (!open) return;
@@ -44,25 +46,43 @@ export function CsvImportHelpButton() {
       </button>
       {open && (
         <div className="absolute right-0 top-full z-20 mt-2 w-80 rounded-xl border border-slate-200 bg-white p-4 shadow-elevated text-sm text-slate-600">
-          <CsvFormatHelp />
-          <button type="button" onClick={downloadLeadImportTemplate} className="btn-secondary mt-3 w-full">
-            <Download size={14} />
-            Download template
-          </button>
+          <CsvFormatHelp stores={stores} />
+          <CsvTemplateButton stores={stores} />
         </div>
       )}
     </div>
   );
 }
 
-function CsvFormatHelp() {
+function useStoreNames() {
+  const query = useQuery<CalendarResponse[]>({
+    queryKey: ['calendars'],
+    queryFn: () => get<CalendarResponse[]>('/api/calendars'),
+  });
+  return { ...query, stores: storeNamesFromCalendars(query.data) };
+}
+
+function CsvTemplateButton({ stores }: { stores: string[] }) {
+  return (
+    <button type="button" onClick={() => downloadLeadImportTemplate(stores[0])} className="btn-secondary mt-3 w-full">
+      <Download size={14} />
+      Download template
+    </button>
+  );
+}
+
+function CsvFormatHelp({ stores }: { stores: string[] }) {
+  const listed = formatStoreList(stores);
   return (
     <div className="space-y-2">
       <p className="font-semibold text-slate-800">CSV format</p>
       <p>Every row must have a name, phone, and store. If anything is missing, the file is rejected and no messages are sent.</p>
       <ul className="list-disc pl-4 space-y-1 text-xs leading-relaxed">
         <li>First name, Last name, Phone number, Preferred warehouse (required)</li>
-        <li>Warehouse must be Tokai, Brackenfell, Longbeach, Somerset, Vredenburg, or Langebaan</li>
+        <li>
+          Warehouse must match a store added under Store Branches
+          {listed ? `: ${listed}` : '. Add a store there first.'}
+        </li>
         <li>Email ID and City can be blank. City is suburb only — do not put the store there instead of warehouse.</li>
       </ul>
       <p className="text-xs">Phones can be +27 82…, 082…, or 2782…. Auto Message plus a selected template is what actually sends.</p>
@@ -79,6 +99,7 @@ export function CsvImportModal({
 }: CsvImportModalProps) {
   const { toast } = useToast();
   const qc = useQueryClient();
+  const { stores } = useStoreNames();
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<CsvImportResponse | null>(null);
@@ -195,9 +216,12 @@ export function CsvImportModal({
             </p>
           ) : null}
           <p className="text-xs text-slate-500">
-            Required on every row: First name, Last name, Phone number, Preferred warehouse (Tokai, Brackenfell, Longbeach, Somerset, Vredenburg, or Langebaan).
+            Required on every row: First name, Last name, Phone number, and Preferred warehouse
+            {stores.length
+              ? ` matching a Store Branches site (${formatStoreList(stores)}).`
+              : '. Add a store under Store Branches first.'}
           </p>
-          <button type="button" onClick={downloadLeadImportTemplate} className="btn-secondary">
+          <button type="button" onClick={() => downloadLeadImportTemplate(stores[0])} className="btn-secondary">
             <Download size={14} />
             Download template
           </button>

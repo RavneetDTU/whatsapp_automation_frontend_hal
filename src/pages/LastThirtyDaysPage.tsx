@@ -7,8 +7,8 @@ import { useToast } from '../context/ToastContext';
 import { get, patch, post } from '../lib/api';
 import { downloadLeadsCsv } from '../lib/csv';
 import { ALL_LEAD_STATUSES, LEAD_SORT_OPTIONS, type LeadSort } from '../lib/leadStatuses';
-import { BRANCH_OPTIONS } from '../lib/branches';
-import type { LeadSummary, LeadPaginatedResponse, LeadListItem, LeadStatus, Campaign } from '../types';
+import { storeNamesFromCalendars } from '../lib/branches';
+import type { CalendarResponse, LeadSummary, LeadPaginatedResponse, LeadListItem, LeadStatus, Campaign } from '../types';
 import { StatusBadge, OldLeadBadge } from '../components/ui/Badge';
 import { Toggle } from '../components/ui/Toggle';
 import { Skeleton, TableSkeleton } from '../components/ui/Spinner';
@@ -282,6 +282,12 @@ export function LastThirtyDaysPage() {
     queryFn: () => get<Campaign[]>('/api/campaigns?limit=100'),
   });
 
+  const calendarsQuery = useQuery<CalendarResponse[]>({
+    queryKey: ['calendars'],
+    queryFn: () => get<CalendarResponse[]>('/api/calendars'),
+  });
+  const branchOptions = storeNamesFromCalendars(calendarsQuery.data);
+
   const aiMutation = useMutation({
     mutationFn: ({ leadId, ai_mode }: { leadId: string; ai_mode: boolean }) =>
       patch<LeadListItem>(`/api/leads/${leadId}`, { ai_mode }),
@@ -468,7 +474,7 @@ export function LastThirtyDaysPage() {
             aria-label="Filter by branch"
           >
             <option value="">All branches</option>
-            {BRANCH_OPTIONS.map((branch) => (
+            {branchOptions.map((branch) => (
               <option key={branch} value={branch}>{branch}</option>
             ))}
           </select>

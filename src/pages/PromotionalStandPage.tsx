@@ -3,7 +3,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChevronDown, ChevronUp, Search, UserPlus, X } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import { get, post } from '../lib/api';
-import { BRANCH_OPTIONS } from '../lib/branches';
+import { storeNamesFromCalendars } from '../lib/branches';
+import type { CalendarResponse } from '../types';
 import { ErrorState, EmptyState } from '../components/ui/States';
 import { TableSkeleton } from '../components/ui/Spinner';
 
@@ -166,6 +167,12 @@ function AddStandLeadModal({
   const { toast } = useToast();
   const [form, setForm] = useState<StandForm>(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
+  const calendarsQuery = useQuery<CalendarResponse[]>({
+    queryKey: ['calendars'],
+    queryFn: () => get<CalendarResponse[]>('/api/calendars'),
+    enabled: open,
+  });
+  const branchOptions = storeNamesFromCalendars(calendarsQuery.data);
 
   useEffect(() => {
     if (open) setForm({ ...EMPTY_FORM, send_at: sastLocalDefault() });
@@ -243,18 +250,22 @@ function AddStandLeadModal({
           <fieldset className="space-y-2">
             <legend className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Preferred warehouse</legend>
             <div className="flex flex-wrap gap-3">
-              {BRANCH_OPTIONS.map((branch) => (
-                <label key={branch} className="inline-flex items-center gap-2 text-sm text-slate-700">
-                  <input
-                    type="radio"
-                    name="warehouse_name"
-                    required
-                    checked={form.warehouse_name === branch}
-                    onChange={() => setForm((current) => ({ ...current, warehouse_name: branch }))}
-                  />
-                  {branch}
-                </label>
-              ))}
+              {branchOptions.length === 0 ? (
+                <p className="text-xs text-amber-700">Add a store under Store Branches first.</p>
+              ) : (
+                branchOptions.map((branch) => (
+                  <label key={branch} className="inline-flex items-center gap-2 text-sm text-slate-700">
+                    <input
+                      type="radio"
+                      name="warehouse_name"
+                      required
+                      checked={form.warehouse_name === branch}
+                      onChange={() => setForm((current) => ({ ...current, warehouse_name: branch }))}
+                    />
+                    {branch}
+                  </label>
+                ))
+              )}
             </div>
           </fieldset>
           <div className="space-y-1.5">

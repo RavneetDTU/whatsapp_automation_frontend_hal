@@ -4,8 +4,8 @@ import { formatDistanceToNow } from 'date-fns';
 import { Search, MessageSquare } from 'lucide-react';
 import { get } from '../lib/api';
 import { ALL_LEAD_STATUSES, LEAD_SORT_OPTIONS, type LeadSort } from '../lib/leadStatuses';
-import { BRANCH_OPTIONS } from '../lib/branches';
-import type { Campaign, ConversationListItem, LeadStatus } from '../types';
+import { storeNamesFromCalendars } from '../lib/branches';
+import type { CalendarResponse, Campaign, ConversationListItem, LeadStatus } from '../types';
 import { StatusBadge } from '../components/ui/Badge';
 import { Spinner } from '../components/ui/Spinner';
 import { ErrorState, EmptyState } from '../components/ui/States';
@@ -50,6 +50,12 @@ export function WhatsAppInboxPage() {
     queryFn: () => get<Campaign[]>('/api/campaigns?limit=100'),
   });
 
+  const calendarsQuery = useQuery<CalendarResponse[]>({
+    queryKey: ['calendars'],
+    queryFn: () => get<CalendarResponse[]>('/api/calendars'),
+  });
+  const branchOptions = storeNamesFromCalendars(calendarsQuery.data);
+
   return (
     <div className="flex h-screen overflow-hidden bg-slate-100">
       {/* Left Panel (35% width): Contact List */}
@@ -91,7 +97,7 @@ export function WhatsAppInboxPage() {
               aria-label="Filter by branch"
             >
               <option value="">All branches</option>
-              {BRANCH_OPTIONS.map((branch) => (
+              {branchOptions.map((branch) => (
                 <option key={branch} value={branch}>{branch}</option>
               ))}
             </select>
