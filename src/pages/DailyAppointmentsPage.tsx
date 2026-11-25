@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { addDays, format } from 'date-fns';
-import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
+import { CalendarDays, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import { get, post } from '../lib/api';
-import type { DailyAppointment, DailyAppointmentList } from '../types';
+import type { DailyAppointment, DailyAppointmentList, ManualBookingResult } from '../types';
 import { EmptyState, ErrorState } from '../components/ui/States';
 import { Spinner, TableSkeleton } from '../components/ui/Spinner';
+import { ManualBookingModal } from '../components/appointments/ManualBookingModal';
 
 function parseDateOnly(value: string): Date {
   const [year, month, day] = value.split('-').map(Number);
@@ -25,6 +26,7 @@ export function DailyAppointmentsPage() {
   const qc = useQueryClient();
   const [date, setDate] = useState<string | null>(null);
   const [store, setStore] = useState('');
+  const [bookOpen, setBookOpen] = useState(false);
 
   const query = useQuery<DailyAppointmentList>({
     queryKey: ['daily-appointments', date, store],
@@ -64,7 +66,7 @@ export function DailyAppointmentsPage() {
       <div className="border-b border-slate-200/80 pb-5">
         <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Daily Appointment</h1>
         <p className="text-xs text-slate-500 mt-0.5">
-          Bot-booked visits from every store for the selected day (Africa/Johannesburg).
+          Bot and manual bookings from every store for the selected day (Africa/Johannesburg).
         </p>
       </div>
 
@@ -118,6 +120,10 @@ export function DailyAppointmentsPage() {
           </select>
         </div>
         <div className="flex items-center gap-3">
+          <button type="button" className="btn-primary" onClick={() => setBookOpen(true)}>
+            <Plus size={16} />
+            Book appointment
+          </button>
           <div className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-center min-w-[7.5rem]">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Appointments</p>
             <p className="text-xl font-bold text-slate-900">{query.data?.count ?? 0}</p>
@@ -138,7 +144,7 @@ export function DailyAppointmentsPage() {
           <EmptyState
             icon={<CalendarDays size={28} />}
             title="No appointments for this date"
-            description="Bot bookings from every store calendar appear here once they are confirmed."
+            description="Bot and manual bookings from every store calendar appear here once they are confirmed."
           />
         ) : (
           <div className="overflow-x-auto">
@@ -201,6 +207,24 @@ export function DailyAppointmentsPage() {
           </div>
         )}
       </div>
+
+      <ManualBookingModal
+        open={bookOpen}
+        defaultDate={selectedDate}
+        onClose={() => setBookOpen(false)}
+        onBooked={(item: ManualBookingResult) => {
+          const bookedDate = item.appointment_datetime?.slice(0, 10);
+          if (bookedDate) setDate(bookedDate);
+          qc.invalidateQueries({ queryKey: ['daily-appointments'] });
+          setBookOpen(false);
+          toast(
+            'success',
+            item.reused_lead
+              ? "Appointment booked on the existing lead. The day-before reminder will use that lead's campaign."
+              : 'Appointment booked. The day-before reminder will use the selected campaign.',
+          );
+        }}
+      />
     </div>
   );
 }

@@ -457,6 +457,21 @@ export interface DailyAppointmentList {
   items: DailyAppointment[];
 }
 
+export interface ManualBookingRequest {
+  calendar_id: number;
+  campaign_id: string;
+  full_name: string;
+  phone: string;
+  email?: string | null;
+  test_type: string;
+  date: string;
+  time: string;
+}
+
+export interface ManualBookingResult extends DailyAppointment {
+  reused_lead: boolean;
+}
+
 export interface BotAutofillItem {
   label: string;
   value: string;
