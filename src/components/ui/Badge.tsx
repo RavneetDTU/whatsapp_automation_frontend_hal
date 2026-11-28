@@ -9,6 +9,7 @@ const PIPELINE_COLORS: Partial<Record<LeadStatus, string>> = {
   BOOKED: 'bg-emerald-50 text-emerald-800 border border-emerald-200/80',
   HANDED_OFF: 'bg-slate-100 text-slate-700 border border-slate-200',
   SUPERVISOR_FOLLOWUP: 'bg-rose-50 text-rose-800 border border-rose-200/80',
+  BENEFIT_CHECK: 'bg-rose-50 text-rose-800 border border-rose-200/80',
 };
 
 const CRM_POSITIVE = 'bg-emerald-50 text-emerald-800 border border-emerald-200/80';
