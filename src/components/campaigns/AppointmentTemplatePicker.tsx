@@ -87,8 +87,8 @@ export function AppointmentTemplatePicker({
         </>
       )}
     >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div className="min-h-0">
+      <div className="grid grid-cols-1 gap-5 md:h-[32rem] md:grid-cols-2">
+        <div className="flex min-h-0 flex-col md:h-full">
         {isLoading ? (
           <div className="flex justify-center py-8"><Spinner /></div>
         ) : error ? (
@@ -102,8 +102,8 @@ export function AppointmentTemplatePicker({
             </div>
           </div>
         ) : (
-          <div className="space-y-3">
-            <div className="relative">
+          <div className="flex min-h-0 flex-1 flex-col gap-3">
+            <div className="relative shrink-0">
               <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="search"
@@ -113,7 +113,7 @@ export function AppointmentTemplatePicker({
                 className="input pl-9"
               />
             </div>
-            <div role="listbox" aria-label={title} className="space-y-2 max-h-80 overflow-y-auto">
+            <div role="listbox" aria-label={title} className="min-h-0 space-y-2 overflow-y-auto max-md:max-h-80 max-md:flex-none md:flex-1">
               <button
                 type="button"
                 role="option"

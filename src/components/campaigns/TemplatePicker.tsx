@@ -102,8 +102,8 @@ export function TemplatePicker({ campaignId, open, onClose }: TemplatePickerProp
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div className="space-y-4 min-h-0">
+        <div className="grid grid-cols-1 gap-5 md:h-[32rem] md:grid-cols-2">
+          <div className="flex min-h-0 flex-col gap-4 md:h-full">
           <div className="relative">
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
@@ -133,7 +133,7 @@ export function TemplatePicker({ campaignId, open, onClose }: TemplatePickerProp
           ) : filtered.length === 0 ? (
             <p className="text-center text-slate-400 text-sm py-10">No templates found.</p>
           ) : (
-            <div className="space-y-2 max-h-80 overflow-y-auto">
+            <div className="min-h-0 space-y-2 overflow-y-auto max-md:max-h-80 max-md:flex-none md:flex-1">
               {filtered.map((t) => (
                 <button
                   key={t.name}

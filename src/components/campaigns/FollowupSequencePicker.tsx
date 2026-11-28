@@ -94,7 +94,7 @@ export function FollowupSequencePicker({
       maxWidth="5xl"
       footer={footer}
     >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 items-start gap-5 md:grid-cols-2">
         <div className="space-y-5 min-h-0">
         {isLoading ? (
           <div className="flex justify-center py-8"><Spinner /></div>

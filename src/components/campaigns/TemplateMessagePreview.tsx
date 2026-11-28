@@ -42,7 +42,7 @@ export function TemplateMessagePreview({
     : note;
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 min-h-0 overflow-y-auto">
+    <div className="h-full min-h-0 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 p-4">
       <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-3">Message preview</p>
       {!template ? (
         <p className="text-sm text-slate-400">Select a template to preview the complete message.</p>
