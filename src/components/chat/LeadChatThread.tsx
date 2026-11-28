@@ -279,7 +279,7 @@ export function LeadChatThread({ leadId, showIdentity = true }: LeadChatThreadPr
                     {(media?.kind === 'image' || media?.kind === 'sticker') && (
                       <ChatImage
                         src={apiUrl(`/api/inbox/message-media?file=${encodeURIComponent(media.file)}`)}
-                        className="w-full max-h-72 object-cover bg-slate-100"
+                        className="block h-auto w-full object-contain bg-slate-100"
                       />
                     )}
                     {showText && <MessageBody text={msg.body} />}

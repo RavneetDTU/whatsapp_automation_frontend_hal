@@ -17,7 +17,7 @@ export function TemplateChrome({ template, part }: TemplateChromeProps) {
         {template.header_media && (
           <ChatImage
             src={apiUrl(`/api/inbox/template-media/${encodeURIComponent(template.name)}`)}
-            className="w-full max-h-56 object-cover bg-slate-100"
+            className="block h-auto w-full object-contain bg-slate-100"
           />
         )}
         {headerText && <p className="mb-1 font-semibold text-slate-900">{headerText}</p>}
