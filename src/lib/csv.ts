@@ -45,7 +45,20 @@ function when(value: string | null | undefined): string {
 }
 
 export function downloadLeadsCsv(leads: LeadListItem[]): void {
-  const headers = ['Name', 'Phone', 'Campaign', 'Created', 'Status', 'Branch', 'Last reply', 'AI mode'];
+  const headers = [
+    'Name',
+    'Phone',
+    'Campaign',
+    'Created',
+    'Status',
+    'Branch',
+    'Last reply',
+    'AI mode',
+    'Age',
+    'Hearing Loss Stage',
+    'Booked at',
+    'Appointment',
+  ];
   const rows = leads.map((lead) => [
     lead.full_name,
     lead.phone,
@@ -55,6 +68,10 @@ export function downloadLeadsCsv(leads: LeadListItem[]): void {
     (lead.branch ?? '').replace(/ Branch$/, ''),
     when(lead.last_reply_at),
     lead.ai_mode ? 'On' : 'Off',
+    lead.age == null ? '' : String(lead.age),
+    lead.hearing_loss_stage ?? '',
+    when(lead.booked_at),
+    when(lead.appointment_datetime),
   ]);
   downloadCsv(`leads-${format(new Date(), 'yyyy-MM-dd')}.csv`, headers, rows);
 }

@@ -187,6 +187,8 @@ export interface LeadSummary {
   responded: number;
 }
 
+export type HearingLossStage = 'Normal' | 'Mild' | 'Mild - Severe' | 'Severe' | 'Profound';
+
 export interface LeadListItem {
   id: string;
   full_name: string;
@@ -194,6 +196,10 @@ export interface LeadListItem {
   campaign_name: string | null;
   branch?: string | null;
   city?: string | null;
+  age?: number | null;
+  hearing_loss_stage?: HearingLossStage | string | null;
+  booked_at?: string | null;
+  appointment_datetime?: string | null;
   status: LeadStatus;
   source?: LeadSource;
   is_old_lead?: boolean;
@@ -232,6 +238,10 @@ export interface LeadDetail {
   campaign_name: string | null;
   branch?: string | null;
   city?: string | null;
+  age?: number | null;
+  hearing_loss_stage?: HearingLossStage | string | null;
+  booked_at?: string | null;
+  appointment_datetime?: string | null;
   meta_ad_id: string | null;
   meta_ad_name: string | null;
   meta_form_fields: Record<string, unknown>;
@@ -252,6 +262,8 @@ export interface LeadUpdate {
   full_name?: string | null;
   email?: string | null;
   status?: LeadStatus | null;
+  age?: number | null;
+  hearing_loss_stage?: HearingLossStage | string | null;
 }
 
 // --- Notes ---

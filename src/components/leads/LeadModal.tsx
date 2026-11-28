@@ -5,7 +5,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { get, patch, post } from '../../lib/api';
 import { ALL_LEAD_STATUSES } from '../../lib/leadStatuses';
-import type { LeadDetail, Note, LeadUpdate } from '../../types';
+import type { HearingLossStage, LeadDetail, Note, LeadUpdate } from '../../types';
 import { Modal } from '../ui/Modal';
 
 import { Spinner, Skeleton } from '../ui/Spinner';
@@ -19,13 +19,38 @@ interface LeadModalProps {
   onClose: () => void;
 }
 
+const HEARING_LOSS_STAGES: HearingLossStage[] = [
+  'Normal',
+  'Mild',
+  'Mild - Severe',
+  'Severe',
+  'Profound',
+];
+
+type LeadTab = 'info' | 'patient' | 'notes' | 'whatsapp' | 'booking';
+
+const TAB_LABELS: Record<LeadTab, string> = {
+  info: 'Basic Info',
+  patient: 'Patient',
+  notes: 'Notes',
+  whatsapp: 'WhatsApp',
+  booking: 'Book Appointment',
+};
+
+function when(value: string | null | undefined): string {
+  if (!value) return '—';
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return '—';
+  return format(parsed, 'MMM d, yyyy HH:mm');
+}
+
 export function LeadModal({ leadId, open, onClose }: LeadModalProps) {
-  const [tab, setTab] = useState<'info' | 'notes' | 'whatsapp' | 'booking'>('info');
+  const [tab, setTab] = useState<LeadTab>('info');
 
   return (
     <Modal open={open} onClose={onClose} title="Edit Lead" subtitle="Update lead details" maxWidth="3xl" fill>
       <div className="flex border-b border-slate-200 px-6 shrink-0">
-        {(['info', 'notes', 'whatsapp', 'booking'] as const).map((t) => (
+        {(['info', 'patient', 'notes', 'whatsapp', 'booking'] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -35,13 +60,14 @@ export function LeadModal({ leadId, open, onClose }: LeadModalProps) {
                 : 'border-transparent text-slate-500 hover:text-slate-700'
             }`}
           >
-            {{ info: 'Basic Info', notes: 'Notes', whatsapp: 'WhatsApp', booking: 'Book Appointment' }[t]}
+            {TAB_LABELS[t]}
           </button>
         ))}
       </div>
 
       <div className={`flex-1 min-h-0 ${tab === 'whatsapp' ? 'flex flex-col' : 'overflow-y-auto px-6 py-4'}`}>
         {tab === 'info' && <BasicInfoTab leadId={leadId} />}
+        {tab === 'patient' && <PatientTab leadId={leadId} />}
         {tab === 'notes' && <NotesTab leadId={leadId} />}
         {tab === 'whatsapp' && <LeadChatThread leadId={leadId} showIdentity={false} />}
         {tab === 'booking' && <LeadBookingTab leadId={leadId} />}
@@ -203,7 +229,108 @@ function BasicInfoTab({ leadId }: { leadId: string }) {
   );
 }
 
-// ── Tab 2: Notes ─────────────────────────────────────────────────────────────
+// ── Tab 2: Patient ───────────────────────────────────────────────────────────
+
+function PatientTab({ leadId }: { leadId: string }) {
+  const { toast } = useToast();
+  const qc = useQueryClient();
+
+  const { data, isLoading, error, refetch } = useQuery<LeadDetail>({
+    queryKey: ['lead', leadId],
+    queryFn: () => get<LeadDetail>(`/api/leads/${leadId}`),
+  });
+
+  const [edits, setEdits] = useState<LeadUpdate>({});
+  const [dirty, setDirty] = useState(false);
+
+  const mutation = useMutation({
+    mutationFn: (payload: LeadUpdate) =>
+      patch<LeadDetail>(`/api/leads/${leadId}`, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['lead', leadId] });
+      qc.invalidateQueries({ queryKey: ['leads'] });
+      toast('success', 'Lead updated.');
+      setDirty(false);
+      setEdits({});
+    },
+    onError: (err: Error) => toast('error', `Failed to update: ${err.message}`),
+  });
+
+  function setField<K extends keyof LeadUpdate>(key: K, val: LeadUpdate[K]) {
+    setEdits((prev) => ({ ...prev, [key]: val }));
+    setDirty(true);
+  }
+
+  if (isLoading) return <div className="flex justify-center py-10"><Spinner size="md" /></div>;
+  if (error) return <ErrorState message={(error as Error).message} onRetry={refetch} />;
+  if (!data) return null;
+
+  const ageValue = edits.age !== undefined ? edits.age : data.age;
+  const stageValue =
+    edits.hearing_loss_stage !== undefined ? edits.hearing_loss_stage : data.hearing_loss_stage;
+
+  return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="label">Age</label>
+          <input
+            className="input"
+            type="number"
+            min={0}
+            max={120}
+            value={ageValue ?? ''}
+            onChange={(e) => setField('age', e.target.value === '' ? null : Number(e.target.value))}
+          />
+        </div>
+        <div>
+          <label className="label">Hearing Loss Stage</label>
+          <select
+            className="select"
+            value={stageValue ?? ''}
+            onChange={(e) =>
+              setField('hearing_loss_stage', (e.target.value || null) as HearingLossStage | null)
+            }
+          >
+            <option value="">Select stage</option>
+            {HEARING_LOSS_STAGES.map((stage) => (
+              <option key={stage} value={stage}>
+                {stage}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="label">Booked at</label>
+          <input className="input bg-slate-50 cursor-default" value={when(data.booked_at)} readOnly />
+        </div>
+        <div>
+          <label className="label">Appointment</label>
+          <input
+            className="input bg-slate-50 cursor-default"
+            value={when(data.appointment_datetime)}
+            readOnly
+          />
+        </div>
+      </div>
+
+      {dirty && (
+        <div className="flex justify-end pt-2">
+          <button
+            onClick={() => mutation.mutate(edits)}
+            disabled={mutation.isPending}
+            className="btn-primary"
+          >
+            {mutation.isPending ? <Spinner size="sm" /> : null}
+            Save Changes
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Tab 3: Notes ─────────────────────────────────────────────────────────────
 
 function NotesTab({ leadId }: { leadId: string }) {
   const { toast } = useToast();
