@@ -4,6 +4,7 @@ import { Search, AlertCircle, RefreshCw, Check } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { get, patch } from '../../lib/api';
 import type { Campaign, CampaignUpdate, WatiTemplate } from '../../types';
+import { TemplateMessagePreview } from './TemplateMessagePreview';
 import { Modal } from '../ui/Modal';
 import { Spinner } from '../ui/Spinner';
 
@@ -26,10 +27,13 @@ export function TemplateSetPicker({
   const qc = useQueryClient();
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<string[]>([]);
+  const [previewName, setPreviewName] = useState<string | null>(null);
 
   useEffect(() => {
     if (open) {
-      setSelected((currentSet ?? []).filter(Boolean).slice(0, MAX_SET));
+      const initial = (currentSet ?? []).filter(Boolean).slice(0, MAX_SET);
+      setSelected(initial);
+      setPreviewName(initial[0] ?? null);
       setSearch('');
     }
   }, [open, currentSet]);
@@ -94,10 +98,11 @@ export function TemplateSetPicker({
       onClose={handleClose}
       title="Campaign template set"
       subtitle="Choose up to 5 Wati templates agents can send from the WhatsApp inbox"
-      maxWidth="xl"
+      maxWidth="5xl"
       footer={footer}
     >
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="space-y-4 min-h-0">
         {selected.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {selected.map((name, idx) => (
@@ -147,8 +152,10 @@ export function TemplateSetPicker({
                 <button
                   key={t.name}
                   type="button"
-                  onClick={() => toggle(t.name)}
-                  disabled={blocked}
+                  onClick={() => {
+                    setPreviewName(t.name);
+                    if (!blocked) toggle(t.name);
+                  }}
                   className={`w-full text-left rounded-xl border p-4 transition-all ${
                     checked
                       ? 'border-brand-500 bg-brand-50 ring-1 ring-brand-500'
@@ -173,7 +180,7 @@ export function TemplateSetPicker({
                       <span className="status-badge bg-indigo-100 text-indigo-700">{t.category}</span>
                     </div>
                   </div>
-                  <p className="text-xs text-slate-500 leading-relaxed pl-6">{t.body_preview}</p>
+                  <p className="text-xs text-slate-500 leading-relaxed pl-6 line-clamp-3">{t.body_preview}</p>
                   {t.placeholder_count > 0 && (
                     <p className="text-xs text-amber-600 mt-1 pl-6">
                       {t.placeholder_count} placeholder{t.placeholder_count > 1 ? 's' : ''}
@@ -184,6 +191,8 @@ export function TemplateSetPicker({
             })}
           </div>
         )}
+        </div>
+        <TemplateMessagePreview template={(data ?? []).find((t) => t.name === previewName) ?? null} />
       </div>
     </Modal>
   );

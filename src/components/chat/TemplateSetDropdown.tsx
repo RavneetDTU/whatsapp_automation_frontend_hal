@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ChevronDown, FileText } from 'lucide-react';
 import { get } from '../../lib/api';
 import type { WatiTemplate } from '../../types';
+import { TemplateMessagePreview } from '../campaigns/TemplateMessagePreview';
 import { Spinner } from '../ui/Spinner';
 
 interface TemplateSetDropdownProps {
@@ -13,30 +14,6 @@ interface TemplateSetDropdownProps {
   disabledReason: string;
   sending: boolean;
   onSend: (templateName: string) => void;
-}
-
-function firstName(fullName: string): string {
-  const trimmed = (fullName || '').trim();
-  return trimmed.split(/\s+/)[0] || trimmed;
-}
-
-function fillTemplateBody(body: string, fullName: string): string {
-  const first = firstName(fullName);
-  const whole = (fullName || '').trim() || first;
-  const values: Record<string, string> = {
-    name: first,
-    first_name: first,
-    customer_name: whole,
-    lead_name: whole,
-    full_name: whole,
-    '1': first,
-  };
-  return (body || '').replace(/\{\{\s*([^}]+)\s*\}\}/g, (_match, raw: string) => {
-    const key = String(raw).trim();
-    if (/^\d+$/.test(key)) return first;
-    const lowered = key.toLowerCase().replace(/ /g, '_');
-    return values[lowered] || values[key] || first;
-  });
 }
 
 export function TemplateSetDropdown({
@@ -93,7 +70,15 @@ export function TemplateSetDropdown({
     body: detailsByName.get(name)?.body_preview || '',
   }));
   const pending = pendingName ? rows.find((row) => row.name === pendingName) ?? { name: pendingName, body: '' } : null;
-  const filledBody = pending ? fillTemplateBody(pending.body, leadName) : '';
+  const pendingTemplate = pending
+    ? detailsByName.get(pending.name) ?? {
+        name: pending.name,
+        language: '',
+        category: '',
+        body_preview: pending.body,
+        placeholder_count: 0,
+      }
+    : null;
 
   return (
     <div ref={rootRef} className="relative">
@@ -113,7 +98,7 @@ export function TemplateSetDropdown({
       </button>
       {open && (
         <div
-          className="absolute right-0 mt-1.5 w-[22rem] max-h-[28rem] overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-lg z-30 py-1"
+          className="absolute right-0 mt-1.5 w-[36rem] max-w-[calc(100vw-2rem)] max-h-[32rem] overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-lg z-30 py-1"
         >
           {pending ? (
             <div className="px-3 py-2.5 space-y-3">
@@ -121,12 +106,11 @@ export function TemplateSetDropdown({
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Ready to send</p>
                 <p className="text-sm font-semibold text-slate-900 mt-0.5">{pending.name}</p>
               </div>
-              <p className="text-[11px] text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-2.5 py-2 leading-relaxed">
-                This sends immediately, even if Jarvis HAL is on.
-              </p>
-              <pre className="text-xs text-slate-700 whitespace-pre-wrap break-words leading-relaxed bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-2 font-sans">
-                {filledBody || 'No message body is available for this template.'}
-              </pre>
+              <TemplateMessagePreview
+                template={pendingTemplate}
+                leadName={leadName}
+                note="This sends immediately, even if Jarvis HAL is on."
+              />
               <div className="flex justify-end gap-2">
                 <button
                   type="button"

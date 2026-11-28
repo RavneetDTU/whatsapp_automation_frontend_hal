@@ -4,35 +4,11 @@ import { AlertCircle, RefreshCw, Search } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { get, post } from '../../lib/api';
 import type { BulkTemplateResponse, LeadListItem, WatiTemplate } from '../../types';
-import { TemplateChrome } from '../chat/TemplateChrome';
+import { TemplateMessagePreview } from '../campaigns/TemplateMessagePreview';
 import { Modal } from '../ui/Modal';
 import { Spinner } from '../ui/Spinner';
 
 const BULK_LIMIT = 200;
-
-function firstName(fullName: string): string {
-  const trimmed = (fullName || '').trim();
-  return trimmed.split(/\s+/)[0] || trimmed;
-}
-
-function fillTemplateBody(body: string, fullName: string): string {
-  const first = firstName(fullName);
-  const whole = (fullName || '').trim() || first;
-  const values: Record<string, string> = {
-    name: first,
-    first_name: first,
-    customer_name: whole,
-    lead_name: whole,
-    full_name: whole,
-    '1': first,
-  };
-  return (body || '').replace(/\{\{\s*([^}]+)\s*\}\}/g, (_match, raw: string) => {
-    const key = String(raw).trim();
-    if (/^\d+$/.test(key)) return first;
-    const lowered = key.toLowerCase().replace(/ /g, '_');
-    return values[lowered] || values[key] || first;
-  });
-}
 
 interface BulkTemplateModalProps {
   open: boolean;
@@ -90,9 +66,6 @@ export function BulkTemplateModal({ open, leads, onClose, onSent }: BulkTemplate
     `${t.name} ${t.language} ${t.category}`.toLowerCase().includes(search.toLowerCase()),
   );
   const selectedTemplate = (templatesQuery.data ?? []).find((t) => t.name === selectedName) ?? null;
-  const filledBody = selectedTemplate && previewLead
-    ? fillTemplateBody(selectedTemplate.body_preview, previewLead.full_name)
-    : '';
 
   return (
     <Modal
@@ -179,27 +152,11 @@ export function BulkTemplateModal({ open, leads, onClose, onSent }: BulkTemplate
           )}
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 min-h-0 overflow-y-auto">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-3">Message preview</p>
-          {!selectedTemplate ? (
-            <p className="text-sm text-slate-400">Select a template to preview the complete message.</p>
-          ) : (
-            <div className="space-y-3">
-              <p className="text-xs text-slate-500">
-                Preview uses {previewLead?.full_name ?? 'the first selected lead'}. Each lead gets their own name filled in.
-              </p>
-              <div className="max-w-sm mx-auto rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
-                <div className="px-4 pt-3 pb-3">
-                  <TemplateChrome template={selectedTemplate} part="header" />
-                  <p className="text-sm text-slate-800 whitespace-pre-wrap break-words leading-relaxed">
-                    {filledBody || 'No message body is available for this template.'}
-                  </p>
-                  <TemplateChrome template={selectedTemplate} part="footer" />
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+        <TemplateMessagePreview
+          template={selectedTemplate}
+          leadName={previewLead?.full_name || 'Lead'}
+          note={`Preview uses ${previewLead?.full_name ?? 'the first selected lead'}. Each lead gets their own name filled in.`}
+        />
       </div>
     </Modal>
   );

@@ -4,6 +4,7 @@ import { AlertCircle, RefreshCw } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { get, patch } from '../../lib/api';
 import type { Campaign, CampaignUpdate, WatiTemplate } from '../../types';
+import { TemplateMessagePreview } from './TemplateMessagePreview';
 import { Modal } from '../ui/Modal';
 import { Spinner } from '../ui/Spinner';
 
@@ -32,6 +33,7 @@ export function FollowupSequencePicker({
   const [finalTemplate, setFinalTemplate] = useState('');
   const [followupHours, setFollowupHours] = useState(24);
   const [finalHours, setFinalHours] = useState(24);
+  const [previewName, setPreviewName] = useState('');
 
   useEffect(() => {
     if (!open) return;
@@ -39,6 +41,7 @@ export function FollowupSequencePicker({
     setFinalTemplate(finalTemplateName ?? '');
     setFollowupHours(followupDelayHours || 24);
     setFinalHours(finalDelayHours || 24);
+    setPreviewName(followupTemplateName || finalTemplateName || '');
   }, [open, followupTemplateName, finalTemplateName, followupDelayHours, finalDelayHours]);
 
   const { data, isLoading, error, refetch } = useQuery<WatiTemplate[]>({
@@ -88,10 +91,11 @@ export function FollowupSequencePicker({
       onClose={onClose}
       title="Follow-up sequence"
       subtitle="Sent only when the lead never replies. A reply cancels whatever is left."
-      maxWidth="xl"
+      maxWidth="5xl"
       footer={footer}
     >
-      <div className="space-y-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="space-y-5 min-h-0">
         {isLoading ? (
           <div className="flex justify-center py-8"><Spinner /></div>
         ) : error ? (
@@ -112,7 +116,10 @@ export function FollowupSequencePicker({
               hint="Sent if they never reply to the first message."
               value={followupTemplate}
               templates={templates}
-              onChange={setFollowupTemplate}
+              onChange={(name) => {
+                setFollowupTemplate(name);
+                setPreviewName(name);
+              }}
             />
             <HoursField
               id="followup-hours"
@@ -126,7 +133,10 @@ export function FollowupSequencePicker({
               hint="Sent if they still never reply after the follow-up. The lead is then marked Inactive."
               value={finalTemplate}
               templates={templates}
-              onChange={setFinalTemplate}
+              onChange={(name) => {
+                setFinalTemplate(name);
+                setPreviewName(name);
+              }}
             />
             <HoursField
               id="final-hours"
@@ -139,6 +149,8 @@ export function FollowupSequencePicker({
             </p>
           </>
         )}
+        </div>
+        <TemplateMessagePreview template={templates.find((t) => t.name === previewName) ?? null} />
       </div>
     </Modal>
   );
@@ -201,7 +213,7 @@ function TemplateField({
               }`}
             >
               <span className="block text-sm font-semibold text-slate-800">{template.name}</span>
-              <span className="mt-1.5 block text-xs text-slate-600 whitespace-pre-wrap break-words leading-relaxed">
+              <span className="mt-1.5 block text-xs text-slate-500 leading-relaxed line-clamp-2">
                 {template.body_preview || 'No message body is available for this template.'}
               </span>
             </button>

@@ -4,6 +4,7 @@ import { Search, AlertCircle, RefreshCw, CheckCircle2 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { get, post } from '../../lib/api';
 import type { WatiTemplate, ApplyTemplateResponse } from '../../types';
+import { TemplateMessagePreview } from './TemplateMessagePreview';
 import { Modal } from '../ui/Modal';
 import { Spinner } from '../ui/Spinner';
 
@@ -79,7 +80,7 @@ export function TemplatePicker({ campaignId, open, onClose }: TemplatePickerProp
       onClose={handleClose}
       title="Select Template"
       subtitle="Choose a WhatsApp message template to send to NEW leads"
-      maxWidth="xl"
+      maxWidth="5xl"
       footer={footer}
     >
       {/* Success result */}
@@ -101,8 +102,8 @@ export function TemplatePicker({ campaignId, open, onClose }: TemplatePickerProp
           </div>
         </div>
       ) : (
-        <div className="space-y-4">
-          {/* Search */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="space-y-4 min-h-0">
           <div className="relative">
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
@@ -150,7 +151,7 @@ export function TemplatePicker({ campaignId, open, onClose }: TemplatePickerProp
                       <span className="status-badge bg-indigo-100 text-indigo-700">{t.category}</span>
                     </div>
                   </div>
-                  <p className="text-xs text-slate-500 leading-relaxed">{t.body_preview}</p>
+                  <p className="text-xs text-slate-500 leading-relaxed line-clamp-3">{t.body_preview}</p>
                   {t.placeholder_count > 0 && (
                     <p className="text-xs text-amber-600 mt-1">{t.placeholder_count} placeholder{t.placeholder_count > 1 ? 's' : ''}</p>
                   )}
@@ -158,6 +159,8 @@ export function TemplatePicker({ campaignId, open, onClose }: TemplatePickerProp
               ))}
             </div>
           )}
+          </div>
+          <TemplateMessagePreview template={(data ?? []).find((t) => t.name === selected) ?? null} />
         </div>
       )}
     </Modal>

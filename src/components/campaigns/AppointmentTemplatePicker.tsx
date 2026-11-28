@@ -4,6 +4,7 @@ import { AlertCircle, RefreshCw, Search } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { get, patch } from '../../lib/api';
 import type { Campaign, CampaignUpdate, WatiTemplate } from '../../types';
+import { TemplateMessagePreview } from './TemplateMessagePreview';
 import { Modal } from '../ui/Modal';
 import { Spinner } from '../ui/Spinner';
 
@@ -71,7 +72,7 @@ export function AppointmentTemplatePicker({
       onClose={onClose}
       title={title}
       subtitle={subtitle}
-      maxWidth="xl"
+      maxWidth="5xl"
       footer={(
         <>
           <button onClick={onClose} className="btn-secondary">Cancel</button>
@@ -86,7 +87,8 @@ export function AppointmentTemplatePicker({
         </>
       )}
     >
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="min-h-0">
         {isLoading ? (
           <div className="flex justify-center py-8"><Spinner /></div>
         ) : error ? (
@@ -100,7 +102,7 @@ export function AppointmentTemplatePicker({
             </div>
           </div>
         ) : (
-          <>
+          <div className="space-y-3">
             <div className="relative">
               <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
@@ -161,15 +163,17 @@ export function AppointmentTemplatePicker({
                         <span className="status-badge bg-indigo-100 text-indigo-700">{template.category}</span>
                       </div>
                     </div>
-                    <span className="block text-xs text-slate-600 whitespace-pre-wrap break-words leading-relaxed">
+                    <span className="block text-xs text-slate-500 leading-relaxed line-clamp-3">
                       {template.body_preview || 'No message body is available for this template.'}
                     </span>
                   </button>
                 );
               })}
             </div>
-          </>
+          </div>
         )}
+        </div>
+        <TemplateMessagePreview template={(data ?? []).find((t) => t.name === selected) ?? null} />
       </div>
     </Modal>
   );
