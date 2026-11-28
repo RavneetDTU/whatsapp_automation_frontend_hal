@@ -11,6 +11,7 @@ import { Modal } from '../ui/Modal';
 import { Spinner, Skeleton } from '../ui/Spinner';
 import { ErrorState, EmptyState } from '../ui/States';
 import { LeadChatThread } from '../chat/LeadChatThread';
+import { LeadBookingTab } from './LeadBookingTab';
 
 interface LeadModalProps {
   leadId: string;
@@ -19,22 +20,22 @@ interface LeadModalProps {
 }
 
 export function LeadModal({ leadId, open, onClose }: LeadModalProps) {
-  const [tab, setTab] = useState<'info' | 'notes' | 'whatsapp'>('info');
+  const [tab, setTab] = useState<'info' | 'notes' | 'whatsapp' | 'booking'>('info');
 
   return (
     <Modal open={open} onClose={onClose} title="Edit Lead" subtitle="Update lead details" maxWidth="3xl" fill>
       <div className="flex border-b border-slate-200 px-6 shrink-0">
-        {(['info', 'notes', 'whatsapp'] as const).map((t) => (
+        {(['info', 'notes', 'whatsapp', 'booking'] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+            className={`px-4 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
               tab === t
                 ? 'border-brand-500 text-brand-600'
                 : 'border-transparent text-slate-500 hover:text-slate-700'
             }`}
           >
-            {{ info: 'Basic Info', notes: 'Notes', whatsapp: 'WhatsApp' }[t]}
+            {{ info: 'Basic Info', notes: 'Notes', whatsapp: 'WhatsApp', booking: 'Book Appointment' }[t]}
           </button>
         ))}
       </div>
@@ -43,6 +44,7 @@ export function LeadModal({ leadId, open, onClose }: LeadModalProps) {
         {tab === 'info' && <BasicInfoTab leadId={leadId} />}
         {tab === 'notes' && <NotesTab leadId={leadId} />}
         {tab === 'whatsapp' && <LeadChatThread leadId={leadId} showIdentity={false} />}
+        {tab === 'booking' && <LeadBookingTab leadId={leadId} />}
       </div>
     </Modal>
   );

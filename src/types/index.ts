@@ -244,6 +244,7 @@ export interface LeadDetail {
   last_activity_at: string;
   created_at: string;
   resubmission_history: LeadResubmission[];
+  reminder_template_name?: string | null;
 }
 
 export interface LeadUpdate {
@@ -471,6 +472,13 @@ export interface ManualBookingRequest {
 
 export interface ManualBookingResult extends DailyAppointment {
   reused_lead: boolean;
+}
+
+export interface LeadBookingRequest {
+  calendar_id: number;
+  test_type: string;
+  date: string;
+  time: string;
 }
 
 export interface BotAutofillItem {
